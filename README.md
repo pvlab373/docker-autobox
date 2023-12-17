@@ -1,4 +1,6 @@
-# docker-autobox
+# Autobox
+
+Autobox is my first attempt at creating a custom docker image for my automation projects. This image is built on top of ubuntu and comes with ansible, terraform and many other handy tools installed.
 
 # Docker Image Creation and Automation Guide
 
@@ -79,8 +81,8 @@ The repository includes a GitHub Actions workflow defined in .github/workflows/d
 ### Workflow Overview
 
 The workflow is triggered on two occasions:
-1. A push to the main branch that changes the Dockerfile.
-2. Automatically at midnight every day.
+1. A push to the main branch that changes the Autobox Dockerfile.
+2. Automatically at 4am every sunday.
 
 It includes steps to check out the repository, set up Docker Buildx, log in to DockerHub, build the Docker image, and push it to DockerHub.
 
