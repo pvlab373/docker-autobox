@@ -40,10 +40,15 @@ RUN add-apt-repository ppa:deadsnakes/ppa && \
 # Install Ansible core version 2.16
 RUN pip3 install ansible-core==2.16.0
 
-# Install Terraform version 1.6.6
-RUN apt-get update && apt-get install -y unzip && \
-    wget https://releases.hashicorp.com/terraform/1.6.6/terraform_1.6.6_linux_amd64.zip && \
-    unzip terraform_1.6.6_linux_amd64.zip -d /usr/local/bin/
+# Determine architecture and install Terraform version 1.6.6
+ARG TARGETARCH
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+        wget https://releases.hashicorp.com/terraform/1.6.6/terraform_1.6.6_linux_amd64.zip -O terraform.zip; \
+    elif [ "$TARGETARCH" = "arm64" ]; then \
+        wget https://releases.hashicorp.com/terraform/1.6.6/terraform_1.6.6_linux_arm64.zip -O terraform.zip; \
+    fi && \
+    unzip terraform.zip -d /usr/local/bin/ && rm terraform.zip
+
 
 # Install Ansible collections for Cisco IOS, Arista EOS, AVD, and Palo Alto PANOS
 RUN ansible-galaxy collection install cisco.ios

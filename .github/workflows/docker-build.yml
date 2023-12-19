@@ -2,13 +2,10 @@ name: Docker Image CI
 
 on:
   schedule:
-    - cron: '5 4 * * 0'
+    - cron: '0 4 * * 0'
   push:
-    branches:
-      - main
-    paths:
-      - 'autobox_dockerfile.yml'
-      - '.github/workflows/docker-build.yml'
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -27,10 +24,33 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+    - name: Determine Tag for Build
+      id: versioning
+      run: |
+        if [[ $GITHUB_EVENT_NAME == 'schedule' ]]; then
+          git fetch --tags
+          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+          IFS='.' read -ra VER <<< "${LATEST_TAG//v/}"
+          MAJOR=${VER[0]}
+          MINOR=${VER[1]}
+          PATCH=${VER[2]}
+          let PATCH+=1
+          NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "::set-output name=VERSION_TAG::$NEW_TAG"
+          echo "::set-output name=LATEST_TAG::latest"
+        else
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          echo "::set-output name=VERSION_TAG::$TAG_NAME"
+          echo "::set-output name=LATEST_TAG::latest"
+        fi
+
     - name: Build and push
       uses: docker/build-push-action@v2
       with:
         context: .
         file: ./autobox_dockerfile.yml
         push: true
-        tags: pvlab373/autobox:latest
+        tags: |
+          pvlab373/autobox:${{ steps.versioning.outputs.VERSION_TAG }}
+          pvlab373/autobox:${{ steps.versioning.outputs.LATEST_TAG }}
+        platforms: linux/amd64,linux/arm64
