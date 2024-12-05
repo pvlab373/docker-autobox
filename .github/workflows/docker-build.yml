@@ -5,6 +5,8 @@ on:
   schedule:
     - cron: '0 4 * * 0'
   push:
+    branches:
+      - main
     tags:
       - 'v*'
 
@@ -30,19 +32,19 @@ jobs:
       run: |
         if [[ $GITHUB_EVENT_NAME == 'schedule' ]]; then
           git fetch --tags
-          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+          LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
           IFS='.' read -ra VER <<< "${LATEST_TAG//v/}"
           MAJOR=${VER[0]}
           MINOR=${VER[1]}
           PATCH=${VER[2]}
           let PATCH+=1
           NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
-          echo "::set-output name=VERSION_TAG::$NEW_TAG"
-          echo "::set-output name=LATEST_TAG::latest"
-        else
+          echo "VERSION_TAG=$NEW_TAG" >> $GITHUB_ENV
+        elif [[ $GITHUB_REF_TYPE == 'tag' ]]; then
           TAG_NAME=${GITHUB_REF#refs/tags/}
-          echo "::set-output name=VERSION_TAG::$TAG_NAME"
-          echo "::set-output name=LATEST_TAG::latest"
+          echo "VERSION_TAG=$TAG_NAME" >> $GITHUB_ENV
+        else
+          echo "VERSION_TAG=dev" >> $GITHUB_ENV
         fi
 
     - name: Build and push
@@ -51,7 +53,5 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: |
-          pvlab373/autobox:${{ steps.versioning.outputs.VERSION_TAG }}
-          pvlab373/autobox:${{ steps.versioning.outputs.LATEST_TAG }}
+        tags: pvlab373/autobox:${{ env.VERSION_TAG }}
         platforms: linux/amd64,linux/arm64
