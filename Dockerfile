@@ -21,10 +21,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     software-properties-common \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Terraform 1.9.8
-RUN wget -q https://releases.hashicorp.com/terraform/1.9.8/terraform_1.9.8_linux_amd64.zip && \
-    unzip terraform_1.9.8_linux_amd64.zip -d /usr/local/bin && \
-    rm terraform_1.9.8_linux_amd64.zip
+# Install Terraform 1.10.3
+RUN wget -q https://releases.hashicorp.com/terraform/1.10.3/terraform_1.10.3_linux_amd64.zip && \
+    unzip terraform_1.10.3_linux_amd64.zip -d /usr/local/bin && \
+    rm terraform_1.10.3_linux_amd64.zip
 
 # Install Ansible Core version 2.16
 RUN pip install --no-cache-dir ansible-core==2.16.0
