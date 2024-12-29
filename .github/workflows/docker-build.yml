@@ -6,8 +6,7 @@ on:
       - dev
       - main
     tags:
-      - 'v*'
-  # 2) Run this workflow every Sunday at 4:00 AM UTC.
+      - '*'
   schedule:
     - cron: '0 4 * * 0'
 
@@ -21,10 +20,8 @@ jobs:
         with:
           ref: ${{ github.event_name == 'schedule' && 'main' || github.ref }}
 
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-
 
       - name: Log in to DockerHub
         uses: docker/login-action@v2
@@ -32,10 +29,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-
       - name: Build and Push
         run: |
-          # 1) If it's a scheduled run => build/push "latest" from `main`.
           if [ "${{ github.event_name }}" = "schedule" ]; then
             echo "Weekly schedule => building autobox:latest from main"
             docker buildx build \
@@ -44,6 +39,7 @@ jobs:
               --push .
             exit 0
           fi
+
 
           if [ "${GITHUB_REF_TYPE}" = "branch" ]; then
             if [ "${GITHUB_REF}" = "refs/heads/dev" ]; then
@@ -55,12 +51,12 @@ jobs:
             else
               echo "Push to main (no tag) => doing nothing"
             fi
-            
           else
             TAG_NAME="${GITHUB_REF#refs/tags/}"
             echo "Tag push => building autobox:${TAG_NAME} and autobox:latest"
             docker buildx build \
               --platform linux/amd64,linux/arm64 \
-              -t ${{ secrets.DOCKERHUB_USERNAME }}/autobox:"${TAG_NAME}" \
+              -t ${{ secrets.DOCKERHUB_USERNAME }}/autobox:${TAG_NAME} \
               -t ${{ secrets.DOCKERHUB_USERNAME }}/autobox:latest \
               --push .
+          fi
