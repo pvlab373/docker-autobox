@@ -53,7 +53,7 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-      tags: |
-        pvlab373/autobox:${{ env.VERSION_TAG }}
-        pvlab373/autobox:latest
-      platforms: linux/amd64,linux/arm64
+        tags: |
+          pvlab373/autobox:${{ env.VERSION_TAG }}
+          pvlab373/autobox:latest
+        platforms: linux/amd64,linux/arm64
