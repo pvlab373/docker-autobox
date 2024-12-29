@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     mtr-tiny \
     iperf3 \
     unzip \
-    httpie \
+#    httpie \
     jq \
     gnupg \
     software-properties-common \
